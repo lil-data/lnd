@@ -5,6 +5,7 @@
     <meta charset="utf-8">
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r71/three.min.js"></script>
     <script type="text/javascript" src="./js/rhill-voronoi-core.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.5/socket.io.min.js"></script>
     <script type="text/javascript">
 
       window.onload = function(e) {
@@ -13,6 +14,8 @@
         var renderer;
         var camera;
         var light;
+
+        var socket = io('https://lnd.herokuapp.com/');
 
         scene = new THREE.Scene();
 
