@@ -17,6 +17,10 @@
 
         var socket = io('https://lnd.herokuapp.com/');
 
+        socket.on('test', function(state){
+            console.log(state);
+        });
+
         scene = new THREE.Scene();
 
         // renderer
