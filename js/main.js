@@ -1,25 +1,21 @@
 /* @flow */
-window.onload = function(e) {
+var camera, scene, renderer, light, stats;
 
-    var scene;
-    var renderer;
-    var camera;
-    var light;
+init();
+animate();
 
-    scene = new THREE.Scene();
+function init() {
 
-    // renderer
-    renderer = new THREE.WebGLRenderer({
-        antialias: true
-    });
     document.body.appendChild(renderer.domElement);
     renderer.setSize(window.innerWidth, window.innerHeight);
-
+    
     // camera
     camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 1000);
     camera.position.set(0, 150, 500);
     light = new THREE.PointLight(0xffffff, 0.8);
     camera.add(light);
+
+    scene = new THREE.Scene();
 
     // voronoi
     var voronoi = new Voronoi();
@@ -61,4 +57,44 @@ window.onload = function(e) {
     console.log(geometry.vertices);
 
     scene.add(mesh);
-};
+
+    // renderer
+    renderer = new THREE.WebGLRenderer({
+        antialias: true
+    });
+
+    stats = new Stats();
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.top = '0px';
+    container.appendChild( stats.domElement );
+}
+
+function onDocumentTouchStart(event) {
+    if (event.touches.length === 1) {
+
+        event.preventDefault();
+
+        // mouseXOnMouseDown = event.touches[0].pageX - windowHalfX;
+    }
+}
+
+function onDocumentTouchMove(event) {
+    if (event.touches.length === 1) {
+
+        event.preventDefault();
+
+        // mouseX = event.touches[0].pageX - windowHalfX;
+    }
+}
+
+
+function animate() {
+    requestAnimationFrame(animate);
+
+    render();
+    stats.update();
+}
+
+function render() {
+    renderer.render(scene, camera);
+}
