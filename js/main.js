@@ -8,7 +8,7 @@ function init() {
 
     document.body.appendChild(renderer.domElement);
     renderer.setSize(window.innerWidth, window.innerHeight);
-    
+
     // camera
     camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 1000);
     camera.position.set(0, 150, 500);
@@ -66,13 +66,19 @@ function init() {
     stats = new Stats();
     stats.domElement.style.position = 'absolute';
     stats.domElement.style.top = '0px';
-    container.appendChild( stats.domElement );
+    container.appendChild(stats.domElement);
+
+    document.addEventListener('touchstart', onDocumentTouchStart, false);
+    document.addEventListener('touchmove', onDocumentTouchMove, false);
+    document.addEventListener('touchend'), onDocumentTouchEnd, false);
 }
 
 function onDocumentTouchStart(event) {
     if (event.touches.length === 1) {
 
         event.preventDefault();
+
+        console.log("Touch did start");
 
         // mouseXOnMouseDown = event.touches[0].pageX - windowHalfX;
     }
@@ -83,7 +89,18 @@ function onDocumentTouchMove(event) {
 
         event.preventDefault();
 
+        console.log("Touch did move");
+
         // mouseX = event.touches[0].pageX - windowHalfX;
+    }
+}
+
+function onDocumentTouchEnd(event) {
+    if (event.touches.length == 1) {
+
+        event.preventDefault();
+
+        console.log("Touch did end");
     }
 }
 
