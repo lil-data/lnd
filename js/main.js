@@ -103,7 +103,7 @@ function chat() {
         initMe(id, index);
         for (var i = 0; i < theusers.length; i++) {
             users.push(theusers[i]);
-            newCube(theusers.x, theusers.y);
+            newCube(theusers[i].x, theusers[i].y);
         }
         console.log("Look who arrived...\n" + JSON.stringify(theusers));
         console.log("I am: " + id + " at Index: " + myIndex);
@@ -113,16 +113,16 @@ function chat() {
         users.push(user);
         console.log(user.id + " joined at (" + user.x + ", " + user.y + ")");
         newCube(user.x, user.y);
-        // update users
     });
 
     socket.on('userDidDisconnect', function(id) {
         for (var i = 0; i < users.length; i++) {
-            // this doesnt work for some reason
-            if (users[i].id == id) {
-                users.splice(i, 1);
-                break;
-            }
+            try {
+                if (users[i].id == id) {
+                    users.splice(i, 1);
+                    break;
+                }
+            } catch (e) {}
         }
         if (myIndex !== 0) {
             myIndex--;
