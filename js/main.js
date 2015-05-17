@@ -84,6 +84,7 @@ function init() {
     stats.domElement.style.top = '0px';
     document.body.appendChild(stats.domElement);
 
+    document.addEventListener('mousedown', onDocumentMouseDown, false);
     document.addEventListener('touchstart', onDocumentTouchStart, false);
     document.addEventListener('touchmove', onDocumentTouchMove, false);
     document.addEventListener('touchend', onDocumentTouchEnd, false);
@@ -158,10 +159,10 @@ function initMe(id, index) {
     // }
 }
 
-// function updateMe() {
-//     socket.emit('userDidUpdate', me, myIndex);
-//     users[myIndex] = me;
-// }
+function updateMe() {
+    socket.emit('userDidUpdate', me, myIndex);
+    users[myIndex] = me;
+}
 
 // function displayUser(x, y) {
 //     newCube(x, y);
@@ -202,6 +203,47 @@ function newCube(user) {
     scene.add(cube);
 }
 
+// TODO: Events->Objects->Update clients
+
+function onDocumentMouseDown(event) {
+
+    event.preventDefault();
+
+    document.addEventListener('mousemove', onDocumentMouseMove, false);
+    document.addEventListener('mouseup', onDocumentMouseUp, false);
+    document.addEventListener('mouseout', onDocumentMouseOut, false);
+
+    scene.getObjectByName(me.id).translateX(event.clientX);
+    scene.getObjectByName(me.id).translateY(event.clientY);
+    scene.getObjectByName(me.id).position.x = me.x;
+    scene.getObjectByName(me.id).position.y = me.y;
+    updateMe();
+}
+
+function onDocumentMouseMove(event) {
+    scene.getObjectByName(me.id).translateX(event.clientX);
+    scene.getObjectByName(me.id).translateY(event.clientY);
+    scene.getObjectByName(me.id).position.x = me.x;
+    scene.getObjectByName(me.id).position.y = me.y;
+    updateMe();
+}
+
+function onDocumentMouseUp(event) {
+
+    document.removeEventListener('mousemove', onDocumentMouseMove, false);
+    document.removeEventListener('mouseup', onDocumentMouseUp, false);
+    document.removeEventListener('mouseout', onDocumentMouseOut, false);
+
+}
+
+function onDocumentMouseOut(event) {
+
+    document.removeEventListener('mousemove', onDocumentMouseMove, false);
+    document.removeEventListener('mouseup', onDocumentMouseUp, false);
+    document.removeEventListener('mouseout', onDocumentMouseOut, false);
+
+}
+
 function onDocumentTouchStart(event) {
 
     if (event.touches.length === 1) {
@@ -209,6 +251,13 @@ function onDocumentTouchStart(event) {
         console.log("Touch did start");
 
         event.preventDefault();
+
+        var object = scene.getObjectByName(me.id);
+        object.position.x = event.touches[0].pageX;
+        object.position.y = event.touches[0].pageY;
+        object.position.x = me.x;
+        object.position.y = me.y;
+        updateMe();
 
         // mouseXOnMouseDown = event.touches[0].pageX - windowHalfX;
         // targetRotationOnMouseDown = targetRotation;
@@ -225,6 +274,13 @@ function onDocumentTouchMove(event) {
 
         event.preventDefault();
 
+        var object = scene.getObjectByName(me.id);
+        object.position.x = event.touches[0].pageX;
+        object.position.y = event.touches[0].pageY;
+        object.position.x = me.x;
+        object.position.y = me.y;
+        updateMe();
+
         // mouseX = event.touches[0].pageX - windowHalfX;
         // targetRotation = targetRotationOnMouseDown + (mouseX - mouseXOnMouseDown) * 0.05;
 
@@ -233,10 +289,12 @@ function onDocumentTouchMove(event) {
 }
 
 function onDocumentTouchEnd(event) {
-    // if (event.touches.length == 1) {
-
     console.log("Touch did end");
-    // }
+
+    var object = scene.getObjectByName(me.id);
+    object.position.x = me.x;
+    object.position.y = me.y;
+    updateMe();
 }
 
 
