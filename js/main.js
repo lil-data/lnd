@@ -103,7 +103,7 @@ function chat() {
         initMe(id, index);
         for (var i = 0; i < theusers.length; i++) {
             users.push(theusers[i]);
-            newCube(theusers[i].x, theusers[i].y);
+            newCube(theusers[i]);
         }
         console.log("Look who arrived...\n" + JSON.stringify(theusers));
         console.log("I am: " + id + " at Index: " + myIndex);
@@ -112,13 +112,14 @@ function chat() {
     socket.on('userDidInit', function(user) {
         users.push(user);
         console.log(user.id + " joined at (" + user.x + ", " + user.y + ")");
-        newCube(user.x, user.y);
+        newCube(user);
     });
 
     socket.on('userDidDisconnect', function(id) {
         for (var i = 0; i < users.length; i++) {
             try {
                 if (users[i].id == id) {
+                    scene.remove(scene.getObjectByName(id));
                     users.splice(i, 1);
                     break;
                 }
@@ -130,15 +131,9 @@ function chat() {
         console.log(id + " disconnected");
     });
 
-    socket.on('userDidUpdate', function(id, x, y) {
-        for (var i = 0; i < users.length; i++) {
-            if (users[i].id == id) {
-                users[i].x = x;
-                users[i].y = y;
-                break;
-            }
-        }
-        console.log(id + " updated to (" + x + ", " + y + ")");
+    socket.on('userDidUpdate', function(user, index) {
+        users[index] = user;
+        console.log(user.id + " updated to (" + user.x + ", " + user.y + ")");
     });
 }
 
@@ -149,10 +144,10 @@ function initMe(id, index) {
 
     me.x = Math.floor(Math.random() * 5) * size;
     me.y = Math.floor(Math.random() * 5) * size;
-    socket.emit('userDidInit', me);
+    socket.emit('userDidInit', me, myIndex);
 
     users[myIndex] = me;
-    newCube(me.x, me.y);
+    newCube(me);
 
     // for (var i = 0; i < users.length; i++) {
     //     if (users[i].id != id) {
@@ -164,7 +159,7 @@ function initMe(id, index) {
 }
 
 // function updateMe() {
-//     socket.emit('userDidUpdate', me);
+//     socket.emit('userDidUpdate', me, myIndex);
 //     users[myIndex] = me;
 // }
 
@@ -183,7 +178,7 @@ function initMe(id, index) {
 //     socket.emit('updateUserCoords', myid, x, y);
 // }
 
-function newCube(x, y) {
+function newCube(user) {
     var geometry = new THREE.BoxGeometry(size, size, size);
 
     for (var i = 0; i < geometry.faces.length; i += 2) {
@@ -200,9 +195,9 @@ function newCube(x, y) {
     });
 
     var cube = new THREE.Mesh(geometry, material);
-
-    cube.position.x = x;
-    cube.position.y = y;
+    cube.name = user.id;
+    cube.position.x = user.x;
+    cube.position.y = user.y;
 
     scene.add(cube);
 }
