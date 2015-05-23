@@ -14,6 +14,7 @@
 
     // init scene
     this.scene = new THREE.Scene();
+    this.lines = [];
 
     var lineMat = new THREE.LineBasicMaterial({color: 0xffffff});
 
@@ -110,7 +111,6 @@
   };
 
   Leonard.prototype.client_user_updated = function() {
-    console.log('update client', this.users[this.id]);
     this.socket.emit('userDidUpdate', this.id, this.users[this.id]);
   };
 
@@ -148,7 +148,25 @@
         size: 10});
     this.pointCloud = new THREE.PointCloud(geometry, material);
     this.scene.add(this.pointCloud);
-    console.log("voronoi updated", this.pointCloud.geometry.vertices);
+
+    // remove previous lines
+    for (var i = 0; i < this.lines.length; ++i) {
+      this.scene.remove(this.lines[i]);
+    }
+    this.lines.length = 0;
+
+    // add voronoi edges
+    var lineMat = new THREE.LineBasicMaterial({color: 0xffffff, linewidth: 20});
+    for (var e in this.vordiagram.edges) {
+        var edge = this.vordiagram.edges[e];
+        var shapeGeom = new THREE.Geometry();
+        shapeGeom.vertices.push(new THREE.Vector3(edge.va.x, edge.va.y, 0));
+        shapeGeom.vertices.push(new THREE.Vector3(edge.vb.x, edge.vb.y, 0));
+
+        var line = new THREE.Line(shapeGeom, lineMat);
+        this.lines.push(line);
+        this.scene.add(line);
+    }
   };
 
   Leonard.prototype.render = function() {
