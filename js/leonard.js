@@ -56,9 +56,23 @@
     // mouse listeners
     domElement.body.addEventListener('mousemove',
       function(event) {
-        that.user_position_updated(event.clientX-(that.width/2), (that.height/2)-event.clientY);
+        that.user_position_updated(
+          event.clientX-(that.width/2),
+          (that.height/2)-event.clientY);
       },
       false);
+
+    domElement.body.addEventListener('ontouchstart', function(event) {
+        that.user_position_updated(
+          event.touches[0].pageX-(that.width/2),
+          (that.height/2)-event.touches[0].pageY);
+      }, false);
+
+    domElement.body.addEventListener('touchmove', function(event) {
+        that.user_position_updated(
+          event.touches[0].pageX-(that.width/2),
+          (that.height/2)-event.touches[0].pageY);
+      }, false);
 
     // init heroku socket and callbacks
     var that = this;
