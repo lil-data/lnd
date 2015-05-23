@@ -1,7 +1,8 @@
 /* @flow */
 var camera, scene, renderer, light, stats, container, socket;
 
-var size = 50;
+var size = 50,
+    mouse = new THREE.Vector3();
 
 var me = {
     id: "",
@@ -135,7 +136,13 @@ function chat() {
     socket.on('userDidUpdate', function(user, index) {
         users[index] = user;
         console.log(user.id + " updated to (" + user.x + ", " + user.y + ")");
+        updateCube(user);
     });
+}
+
+function updateCube(user) {
+    var pos = new THREE.Vector3(user.x, user.y, 0);
+    scene.getObjectByName(user.id).position.copy(pos);
 }
 
 function initMe(id, index) {
@@ -160,6 +167,8 @@ function initMe(id, index) {
 }
 
 function updateMe() {
+    me.x = scene.getObjectByName(me.id).position.x;
+    me.y = scene.getObjectByName(me.id).position.y;
     socket.emit('userDidUpdate', me, myIndex);
     users[myIndex] = me;
 }
@@ -203,8 +212,6 @@ function newCube(user) {
     scene.add(cube);
 }
 
-// TODO: Events->Objects->Update clients
-
 function onDocumentMouseDown(event) {
 
     event.preventDefault();
@@ -213,18 +220,19 @@ function onDocumentMouseDown(event) {
     document.addEventListener('mouseup', onDocumentMouseUp, false);
     document.addEventListener('mouseout', onDocumentMouseOut, false);
 
-    scene.getObjectByName(me.id).translateX(event.clientX);
-    scene.getObjectByName(me.id).translateY(event.clientY);
-    scene.getObjectByName(me.id).position.x = me.x;
-    scene.getObjectByName(me.id).position.y = me.y;
+    transformMouse(event);
+    scene.getObjectByName(me.id).position.copy(mouse);
     updateMe();
 }
 
+function transformMouse(event) {
+    mouse.x = event.clientX-800;
+    mouse.y = -event.clientY+450;
+}
+
 function onDocumentMouseMove(event) {
-    scene.getObjectByName(me.id).translateX(event.clientX);
-    scene.getObjectByName(me.id).translateY(event.clientY);
-    scene.getObjectByName(me.id).position.x = me.x;
-    scene.getObjectByName(me.id).position.y = me.y;
+    transformMouse(event);
+    scene.getObjectByName(me.id).position.copy(mouse);
     updateMe();
 }
 
@@ -234,6 +242,9 @@ function onDocumentMouseUp(event) {
     document.removeEventListener('mouseup', onDocumentMouseUp, false);
     document.removeEventListener('mouseout', onDocumentMouseOut, false);
 
+    transformMouse(event);
+    scene.getObjectByName(me.id).position.copy(mouse);
+    updateMe();
 }
 
 function onDocumentMouseOut(event) {
@@ -252,13 +263,6 @@ function onDocumentTouchStart(event) {
 
         event.preventDefault();
 
-        var object = scene.getObjectByName(me.id);
-        object.position.x = event.touches[0].pageX;
-        object.position.y = event.touches[0].pageY;
-        object.position.x = me.x;
-        object.position.y = me.y;
-        updateMe();
-
         // mouseXOnMouseDown = event.touches[0].pageX - windowHalfX;
         // targetRotationOnMouseDown = targetRotation;
 
@@ -274,13 +278,6 @@ function onDocumentTouchMove(event) {
 
         event.preventDefault();
 
-        var object = scene.getObjectByName(me.id);
-        object.position.x = event.touches[0].pageX;
-        object.position.y = event.touches[0].pageY;
-        object.position.x = me.x;
-        object.position.y = me.y;
-        updateMe();
-
         // mouseX = event.touches[0].pageX - windowHalfX;
         // targetRotation = targetRotationOnMouseDown + (mouseX - mouseXOnMouseDown) * 0.05;
 
@@ -291,16 +288,11 @@ function onDocumentTouchMove(event) {
 function onDocumentTouchEnd(event) {
     console.log("Touch did end");
 
-    var object = scene.getObjectByName(me.id);
-    object.position.x = me.x;
-    object.position.y = me.y;
-    updateMe();
 }
 
 
 function animate() {
     requestAnimationFrame(animate);
-
     render();
     stats.update();
 }
