@@ -12,6 +12,11 @@
     form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
     input
     form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+    #uploadPreview img{
+    height:32px;
+    top:100px;
+    position: absolute;
+    }
     </style>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r71/three.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/stats.js/r11/Stats.min.js"></script>
@@ -20,10 +25,10 @@
     <!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.js"></script> -->
   </head>
   <body>
-<!--   <ul id="messages"></ul>
-  <form action="">
-    <input id="m" autocomplete="off" /><button>Send</button>
-  </form> -->
-  <script type="text/javascript" src="js/main.js"></script>
+    <input id="uploadImage" type="file" accept="image/*;capture=camera">
+    <div id="uploadPreview">
+    <img id="preview">
+    </div>
+    <script type="text/javascript" src="js/main.js"></script>
   </body>
 </html>

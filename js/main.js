@@ -8,9 +8,13 @@ var size = 50,
 var me = {
     id: "",
     x: 0,
-    y: 0
+    y: 0,
+    img: false
 };
 var myIndex = 0;
+var myImageUpload = document.getElementById('uploadImage');
+var myImagePreview = document.getElementById('preview');
+var myImage = new Image();
 var users = [];
 
 init();
@@ -78,6 +82,8 @@ function init() {
     stats.domElement.style.top = '0px';
     document.body.appendChild(stats.domElement);
 
+    myImageUpload.addEventListener('change', uploadMyImage, false);
+
     document.addEventListener('mousedown', onDocumentMouseDown, false);
     document.addEventListener('touchstart', onDocumentTouchStart, false);
     document.addEventListener('touchmove', onDocumentTouchMove, false);
@@ -122,6 +128,10 @@ function comms() {
         console.log(user.id + " updated to (" + user.x + ", " + user.y + ")");
         updateCube(user);
     });
+
+    socket.on('userDidUploadImage', function(user, index, img) {
+       console.log(img); 
+    });
 }
 
 function updateCube(user) {
@@ -142,7 +152,7 @@ function initMe(id, index) {
     newCube(me);
 }
 
-function updateMe() {
+function updateMyPosition() {
     me.x = scene.getObjectByName(me.id).position.x;
     me.y = scene.getObjectByName(me.id).position.y;
     socket.emit('userDidUpdate', me, myIndex);
@@ -173,6 +183,25 @@ function newCube(user) {
     scene.add(cube);
 }
 
+function uploadMyImage() {
+    var img = myImageUpload.files[0];
+    var reader = new FileReader();
+    reader.onload = (function(aImg) {
+        return function(e) {
+            aImg.src = e.target.result;
+        };
+    })(myImagePreview);
+    reader.readAsDataURL(img);
+    console.log(myImagePreview.src);
+
+    // trim the image
+    // add it as face to cube
+    // upload to server
+
+    socket.emit('userDidUploadImage', me, myIndex, myImagePreview.src);
+    me.img = true;
+}
+
 function onDocumentMouseDown(event) {
 
     event.preventDefault();
@@ -183,13 +212,13 @@ function onDocumentMouseDown(event) {
 
     transformMouse(event);
     scene.getObjectByName(me.id).position.copy(mouse);
-    updateMe();
+    updateMyPosition();
 }
 
 function onDocumentMouseMove(event) {
     transformMouse(event);
     scene.getObjectByName(me.id).position.copy(mouse);
-    updateMe();
+    updateMyPosition();
 }
 
 function onDocumentMouseUp(event) {
@@ -200,7 +229,7 @@ function onDocumentMouseUp(event) {
 
     transformMouse(event);
     scene.getObjectByName(me.id).position.copy(mouse);
-    updateMe();
+    updateMyPosition();
 }
 
 function onDocumentMouseOut(event) {
@@ -228,7 +257,7 @@ function onDocumentTouchStart(event) {
 
         transformTouch(event);
         scene.getObjectByName(me.id).position.copy(touch);
-        updateMe();
+        updateMyPosition();
     }
 }
 
@@ -239,7 +268,7 @@ function onDocumentTouchMove(event) {
 
         transformTouch(event);
         scene.getObjectByName(me.id).position.copy(touch);
-        updateMe();
+        updateMyPosition();
 
     }
 }
@@ -247,7 +276,7 @@ function onDocumentTouchMove(event) {
 function onDocumentTouchEnd(event) {
     transformTouch(event);
     scene.getObjectByName(me.id).position.copy(touch);
-    updateMe();
+    updateMyPosition();
 }
 
 
