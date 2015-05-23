@@ -44,45 +44,38 @@
     var that = this;
     this.socket = io('https://lnd.herokuapp.com/');
 
-    this.socket.on('initUser', function(usersArray, userId, userIndex) {
-      that.server_on_connection(usersArray, userId, userIndex);
+    this.socket.on('initUser', function(userId, users) {
+      that.server_on_connection(users, userId);
     });
 
-    this.socket.on('userDidInit', function(user) {
-      that.server_user_added(user);
+    this.socket.on('userDidInit', function(userId, user) {
+      that.server_user_added(userId, user);
     });
 
     this.socket.on('userDidDisconnect', function(userId) {
       that.server_user_removed(userId);
     });
 
-    this.socket.on('userDidUpdate', function(user, userIndex) {
-      that.server_user_updated(user, userIndex)
+    this.socket.on('userDidUpdate', function(userId, user) {
+      that.server_user_updated(userId, user)
     });
   };
 
-  Leonard.prototype.server_on_connection = function(usersArray, userId, userIndex) {
-    console.log('Server: connected', usersArray, userId, userIndex);
-
-    // convert user array into users object
-    for (var u in usersArray) {
-      this.users[usersArray[u].id] = {
-        x: usersArray[u].x,
-        y: usersArray[u].y,
-        img: usersArray[u].img};
-    }
+  Leonard.prototype.server_on_connection = function(users, userId) {
+    console.log('Server: connected', users, userId);
 
     // add self to users object
     this.id = userId
+    this.users = users;
     this.users[userId] = {x: 100, y: 100, img: false};
 
     // notify server
-    this.socket.emit('userDidInit', {id: this.id, x: 100, y: 100}, this.index);
+    this.socket.emit('userDidInit', this.id, this.users[this.id]);
   };
 
-  Leonard.prototype.server_user_added = function(user) {
-    console.log('Server: user', user.id, 'added at', user.x, user.y);
-    this.users[user.id] = {x: user.x, y: user.y, img: user.img};
+  Leonard.prototype.server_user_added = function(userId, user) {
+    console.log('Server: user', userId, 'added at', user.x, user.y);
+    this.users[userId] = {x: user.x, y: user.y, img: user.img};
   };
 
   Leonard.prototype.server_user_removed = function(userId) {
@@ -90,15 +83,16 @@
     delete this.users[userId];
   };
 
-  Leonard.prototype.server_user_updated = function(user, userIndex) {
-    console.log('Server: user', user.id, 'updated', 'x');
-    this.users[user.id].x = user.x;
-    this.users[user.id].y = user.y;
-    this.users[user.id].img = user.img;
+  Leonard.prototype.server_user_updated = function(userId, user) {
+    console.log('Server: user', userId, 'updated', 'x');
+    this.users[userId].x = user.x;
+    this.users[userId].y = user.y;
+    this.users[userId].img = user.img;
   };
 
   Leonard.prototype.client_user_updated = function() {
     console.log('update client');
+    this.socket.emit('userDidUpdate', self.id, self.users[self.id]);
   };
 
   Leonard.prototype.update_voronoi = function() {
