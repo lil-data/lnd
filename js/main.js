@@ -2,28 +2,24 @@
 var camera, scene, renderer, light, stats, container, socket;
 
 var size = 50,
-    mouse = new THREE.Vector3();
+    mouse = new THREE.Vector3(),
+    touch = new THREE.Vector3();
 
 var me = {
     id: "",
     x: 0,
-    y: 0
+    y: 0,
+    img: false
 };
 var myIndex = 0;
+var myImageUpload = document.getElementById('uploadImage');
+var myImagePreview = document.getElementById('preview');
+var myImage = new Image();
 var users = [];
-// var targetRotation = 0;
-// var targetRotationOnMouseDown = 0;
-
-// var mouseX = 0;
-// var mouseXOnMouseDown = 0;
-
-// var windowHalfX = window.innerWidth / 2;
-// var windowHalfY = window.innerHeight / 2;
 
 init();
-chat();
-render();
-update();
+comms();
+animate();
 
 function init() {
     socket = io('https://lnd.herokuapp.com/');
@@ -33,6 +29,7 @@ function init() {
     renderer = new THREE.WebGLRenderer({
         antialias: true
     });
+
     document.body.appendChild(renderer.domElement);
     renderer.setSize(window.innerWidth, window.innerHeight);
 
@@ -110,7 +107,10 @@ function init() {
     stats = new Stats();
     stats.domElement.style.position = 'absolute';
     stats.domElement.style.top = '0px';
+    stats.domElement.style.left = '500px';
     document.body.appendChild(stats.domElement);
+
+    myImageUpload.addEventListener('change', handleMyImage, false);
 
     document.addEventListener('mousedown', onDocumentMouseDown, false);
     document.addEventListener('touchstart', onDocumentTouchStart, false);
@@ -118,16 +118,7 @@ function init() {
     document.addEventListener('touchend', onDocumentTouchEnd, false);
 }
 
-function chat() {
-    // $('form').submit(function() {
-    //     socket.emit('chat message', $('#m').val());
-    //     $('#m').val('');
-    //     return false;
-    // });
-    // socket.on('chat message', function(msg) {
-    //     $('#messages').append($('<li>').text(msg));
-    // });
-
+function comms() {
     socket.on('initUser', function(theusers, id, index) {
         initMe(id, index);
         for (var i = 0; i < theusers.length; i++) {
@@ -165,6 +156,10 @@ function chat() {
         console.log(user.id + " updated to (" + user.x + ", " + user.y + ")");
         // updateCube(user);
     });
+
+    socket.on('userDidUploadImage', function(user, index, img) {
+        console.log("img: " + img);
+    });
 }
 
 function updateCube(user) {
@@ -182,38 +177,15 @@ function initMe(id, index) {
     socket.emit('userDidInit', me, myIndex);
 
     users[myIndex] = me;
-    // newCube(me);
-
-    // for (var i = 0; i < users.length; i++) {
-    //     if (users[i].id != id) {
-    //         displayUser(users[i].x, users[i].y);
-    //     } else {
-    //         createNewUser(users[i].x, users[i].y);
-    //     }
-    // }
+    newCube(me);
 }
 
-function updateMe() {
+function updateMyPosition() {
     me.x = scene.getObjectByName(me.id).position.x;
     me.y = scene.getObjectByName(me.id).position.y;
     socket.emit('userDidUpdate', me, myIndex);
     users[myIndex] = me;
 }
-
-// function displayUser(x, y) {
-//     newCube(x, y);
-// }
-
-// function createNewUser(x, y) {
-//     x = Math.floor(Math.random() * 5) * size;
-//     y = Math.floor(Math.random() * 5) * size;
-//     newCube(x, y);
-//     updateUserCoords(myid, x, y);
-// }
-
-// function updateUserCoords(myid, x, y) {
-//     socket.emit('updateUserCoords', myid, x, y);
-// }
 
 function newCube(user) {
     var geometry = new THREE.BoxGeometry(size, size, size);
@@ -223,6 +195,7 @@ function newCube(user) {
         var hex = Math.random() * 0xffffff;
         geometry.faces[i].color.setHex(hex);
         geometry.faces[i + 1].color.setHex(hex);
+        geometry.faces[i].materialIndex = 0;
 
     }
 
@@ -239,6 +212,38 @@ function newCube(user) {
     scene.add(cube);
 }
 
+function handleMyImage() {
+    var img = myImageUpload.files[0];
+    var reader = new FileReader();
+    reader.onload = (function(aImg) {
+        return function(e) {
+            // aImg.src = e.target.result;
+            socket.emit('userDidUploadImage', me, myIndex, e.target.result);
+            addImageAsTexture(me, e.target.result);
+            me.img = true;
+        };
+    })(myImagePreview);
+    reader.readAsDataURL(img);
+}
+
+function addImageAsTexture(user, target) {
+    var texture = new Image(256,256);
+    texture.src = target;
+    // texture.width = 256;
+    // texture.height = 256;
+    console.log(texture.width);
+
+    var imgTxt = new THREE.ImageUtils.loadTexture(target);
+    imgTxt.wrapS = THREE.ClampToEdgeWrapping;
+    imgTxt.wrapT = THREE.ClampToEdgeWrapping;
+    imgTxt.wrapS = THREE.MirroredRepeatWrapping;
+    imgTxt.wrapT = THREE.MirroredRepeatWrapping;
+    imgTxt.repeat.set(1, 1);
+    scene.getObjectByName(user.id).material.map = imgTxt;
+    scene.getObjectByName(user.id).material.needsUpdate = true;
+}
+
+
 function onDocumentMouseDown(event) {
 
     event.preventDefault();
@@ -249,18 +254,13 @@ function onDocumentMouseDown(event) {
 
     transformMouse(event);
     scene.getObjectByName(me.id).position.copy(mouse);
-    updateMe();
-}
-
-function transformMouse(event) {
-    mouse.x = event.clientX-800;
-    mouse.y = -event.clientY+450;
+    updateMyPosition();
 }
 
 function onDocumentMouseMove(event) {
     transformMouse(event);
     scene.getObjectByName(me.id).position.copy(mouse);
-    updateMe();
+    updateMyPosition();
 }
 
 function onDocumentMouseUp(event) {
@@ -271,7 +271,7 @@ function onDocumentMouseUp(event) {
 
     transformMouse(event);
     scene.getObjectByName(me.id).position.copy(mouse);
-    updateMe();
+    updateMyPosition();
 }
 
 function onDocumentMouseOut(event) {
@@ -282,39 +282,43 @@ function onDocumentMouseOut(event) {
 
 }
 
+function transformMouse(event) {
+    mouse.x = event.clientX - 800;
+    mouse.y = -event.clientY + 450;
+}
+
+function transformTouch(event) {
+    touch.x = event.touches[0].pageX - 500;
+    touch.y = -event.touches[0].pageY + 500;
+}
+
 function onDocumentTouchStart(event) {
 
     if (event.touches.length === 1) {
+        // event.preventDefault();
 
-        console.log("Touch did start");
-
-        event.preventDefault();
-
-        // mouseXOnMouseDown = event.touches[0].pageX - windowHalfX;
-        // targetRotationOnMouseDown = targetRotation;
-
+        transformTouch(event);
+        scene.getObjectByName(me.id).position.copy(touch);
+        updateMyPosition();
     }
-
 }
 
 function onDocumentTouchMove(event) {
 
     if (event.touches.length === 1) {
+        // event.preventDefault();
 
-        console.log("Touch did move");
-
-        event.preventDefault();
-
-        // mouseX = event.touches[0].pageX - windowHalfX;
-        // targetRotation = targetRotationOnMouseDown + (mouseX - mouseXOnMouseDown) * 0.05;
+        transformTouch(event);
+        scene.getObjectByName(me.id).position.copy(touch);
+        updateMyPosition();
 
     }
-
 }
 
 function onDocumentTouchEnd(event) {
-    console.log("Touch did end");
-
+    transformTouch(event);
+    scene.getObjectByName(me.id).position.copy(touch);
+    updateMyPosition();
 }
 
 
@@ -325,7 +329,6 @@ function render() {
     requestAnimationFrame(render);
 }
 
-function update() {
-    // plane.rotation.y = cube.rotation.y += (targetRotation - cube.rotation.y) * 0.05;
-    setTimeout(update, 1000/60); // 60 fps
+function render() {
+    renderer.render(scene, camera);
 }

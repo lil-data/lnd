@@ -29,7 +29,7 @@
       new THREE.PointCloudMaterial({
         color: 0xffffff,
         vertexColors: THREE.VertexColors,
-        size: 10});
+        size: 10}));
 
     // init voronoi
     this.voronoi = new Voronoi();
