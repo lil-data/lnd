@@ -29,6 +29,7 @@ function init() {
     renderer = new THREE.WebGLRenderer({
         antialias: true
     });
+    
     document.body.appendChild(renderer.domElement);
     renderer.setSize(window.innerWidth, window.innerHeight);
     // camera
@@ -80,9 +81,10 @@ function init() {
     stats = new Stats();
     stats.domElement.style.position = 'absolute';
     stats.domElement.style.top = '0px';
+    stats.domElement.style.left = '500px';
     document.body.appendChild(stats.domElement);
 
-    myImageUpload.addEventListener('change', uploadMyImage, false);
+    myImageUpload.addEventListener('change', handleMyImage, false);
 
     document.addEventListener('mousedown', onDocumentMouseDown, false);
     document.addEventListener('touchstart', onDocumentTouchStart, false);
@@ -130,7 +132,7 @@ function comms() {
     });
 
     socket.on('userDidUploadImage', function(user, index, img) {
-       console.log(img); 
+        console.log("img: " + img);
     });
 }
 
@@ -167,6 +169,7 @@ function newCube(user) {
         var hex = Math.random() * 0xffffff;
         geometry.faces[i].color.setHex(hex);
         geometry.faces[i + 1].color.setHex(hex);
+        geometry.faces[i].materialIndex = 0;
 
     }
 
@@ -183,24 +186,37 @@ function newCube(user) {
     scene.add(cube);
 }
 
-function uploadMyImage() {
+function handleMyImage() {
     var img = myImageUpload.files[0];
     var reader = new FileReader();
     reader.onload = (function(aImg) {
         return function(e) {
-            aImg.src = e.target.result;
+            // aImg.src = e.target.result;
+            socket.emit('userDidUploadImage', me, myIndex, e.target.result);
+            addImageAsTexture(me, e.target.result);
+            me.img = true;
         };
     })(myImagePreview);
     reader.readAsDataURL(img);
-    console.log(myImagePreview.src);
-
-    // trim the image
-    // add it as face to cube
-    // upload to server
-
-    socket.emit('userDidUploadImage', me, myIndex, myImagePreview.src);
-    me.img = true;
 }
+
+function addImageAsTexture(user, target) {
+    var texture = new Image(256,256);
+    texture.src = target;
+    // texture.width = 256;
+    // texture.height = 256;
+    console.log(texture.width);
+
+    var imgTxt = new THREE.ImageUtils.loadTexture(target);
+    imgTxt.wrapS = THREE.ClampToEdgeWrapping;
+    imgTxt.wrapT = THREE.ClampToEdgeWrapping;
+    imgTxt.wrapS = THREE.MirroredRepeatWrapping;
+    imgTxt.wrapT = THREE.MirroredRepeatWrapping;
+    imgTxt.repeat.set(1, 1);
+    scene.getObjectByName(user.id).material.map = imgTxt;
+    scene.getObjectByName(user.id).material.needsUpdate = true;
+}
+
 
 function onDocumentMouseDown(event) {
 
@@ -253,7 +269,7 @@ function transformTouch(event) {
 function onDocumentTouchStart(event) {
 
     if (event.touches.length === 1) {
-        event.preventDefault();
+        // event.preventDefault();
 
         transformTouch(event);
         scene.getObjectByName(me.id).position.copy(touch);
@@ -264,7 +280,7 @@ function onDocumentTouchStart(event) {
 function onDocumentTouchMove(event) {
 
     if (event.touches.length === 1) {
-        event.preventDefault();
+        // event.preventDefault();
 
         transformTouch(event);
         scene.getObjectByName(me.id).position.copy(touch);

@@ -12,10 +12,18 @@
     form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
     input
     form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+    #uploadImage {
+    top:100px;
+    height: 100px;
+    position: absolute;
+    }
     #uploadPreview img{
     height:32px;
     top:100px;
     position: absolute;
+    }
+    #canvascontainer {
+      top:200px;
     }
     </style>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r71/three.min.js"></script>
@@ -27,8 +35,9 @@
   <body>
     <input id="uploadImage" type="file" accept="image/*;capture=camera">
     <div id="uploadPreview">
-    <img id="preview">
+      <img id="preview">
+      <script type="text/javascript" src="js/main.js"></script>
     </div>
-    <script type="text/javascript" src="js/main.js"></script>
+    <div id="canvascontainer"></div>
   </body>
 </html>
