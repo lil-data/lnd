@@ -104,7 +104,7 @@
   };
 
   Leonard.prototype.server_user_updated = function(userId, user) {
-    console.log('Server: user', userId, 'updated', user.x, user.y);
+    // console.log('Server: user', userId, 'updated', user.x, user.y);
     this.users[userId].x = user.x;
     this.users[userId].y = user.y;
     this.users[userId].img = user.img;
