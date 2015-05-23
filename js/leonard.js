@@ -65,7 +65,7 @@
     console.log('Server: connected', users, userId);
 
     // add self to users object
-    this.id = userId
+    this.id = userId;
     this.users = users;
     this.users[userId] = {x: 100, y: 100, img: false};
 
@@ -84,7 +84,7 @@
   };
 
   Leonard.prototype.server_user_updated = function(userId, user) {
-    console.log('Server: user', userId, 'updated', 'x');
+    console.log('Server: user', userId, 'updated');
     this.users[userId].x = user.x;
     this.users[userId].y = user.y;
     this.users[userId].img = user.img;
