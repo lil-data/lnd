@@ -44,7 +44,7 @@
     var that = this;
     this.socket = io('https://lnd.herokuapp.com/');
 
-    this.socket.on('initUser', function(userId, users) {
+    this.socket.on('initUser', function(users, userId) {
       that.server_on_connection(users, userId);
     });
 
@@ -67,7 +67,7 @@
     // add self to users object
     this.id = userId;
     this.users = users;
-    this.users[userId] = {x: 100, y: 100, img: false};
+    this.users[this.id] = {x: 100, y: 100, img: false};
 
     // notify server
     this.socket.emit('userDidInit', this.id, this.users[this.id]);
