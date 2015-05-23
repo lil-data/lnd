@@ -110,14 +110,14 @@
   };
 
   Leonard.prototype.client_user_updated = function() {
-    console.log('update client');
-    this.socket.emit('userDidUpdate', self.id, self.users[self.id]);
+    console.log('update client', this.users[this.id]);
+    this.socket.emit('userDidUpdate', this.id, this.users[this.id]);
   };
 
   Leonard.prototype.user_position_updated = function(x, y) {
-    console.log(x, y);
     this.users[this.id].x = x;
     this.users[this.id].y = y;
+    this.client_user_updated();
   };
 
   Leonard.prototype.update_voronoi = function() {
