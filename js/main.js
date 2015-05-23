@@ -2,7 +2,8 @@
 var camera, scene, renderer, light, stats, container, socket;
 
 var size = 50,
-    mouse = new THREE.Vector3();
+    mouse = new THREE.Vector3(),
+    touch = new THREE.Vector3();
 
 var me = {
     id: "",
@@ -11,17 +12,9 @@ var me = {
 };
 var myIndex = 0;
 var users = [];
-// var targetRotation = 0;
-// var targetRotationOnMouseDown = 0;
-
-// var mouseX = 0;
-// var mouseXOnMouseDown = 0;
-
-// var windowHalfX = window.innerWidth / 2;
-// var windowHalfY = window.innerHeight / 2;
 
 init();
-chat();
+comms();
 animate();
 
 function init() {
@@ -91,16 +84,7 @@ function init() {
     document.addEventListener('touchend', onDocumentTouchEnd, false);
 }
 
-function chat() {
-    // $('form').submit(function() {
-    //     socket.emit('chat message', $('#m').val());
-    //     $('#m').val('');
-    //     return false;
-    // });
-    // socket.on('chat message', function(msg) {
-    //     $('#messages').append($('<li>').text(msg));
-    // });
-
+function comms() {
     socket.on('initUser', function(theusers, id, index) {
         initMe(id, index);
         for (var i = 0; i < theusers.length; i++) {
@@ -156,14 +140,6 @@ function initMe(id, index) {
 
     users[myIndex] = me;
     newCube(me);
-
-    // for (var i = 0; i < users.length; i++) {
-    //     if (users[i].id != id) {
-    //         displayUser(users[i].x, users[i].y);
-    //     } else {
-    //         createNewUser(users[i].x, users[i].y);
-    //     }
-    // }
 }
 
 function updateMe() {
@@ -172,21 +148,6 @@ function updateMe() {
     socket.emit('userDidUpdate', me, myIndex);
     users[myIndex] = me;
 }
-
-// function displayUser(x, y) {
-//     newCube(x, y);
-// }
-
-// function createNewUser(x, y) {
-//     x = Math.floor(Math.random() * 5) * size;
-//     y = Math.floor(Math.random() * 5) * size;
-//     newCube(x, y);
-//     updateUserCoords(myid, x, y);
-// }
-
-// function updateUserCoords(myid, x, y) {
-//     socket.emit('updateUserCoords', myid, x, y);
-// }
 
 function newCube(user) {
     var geometry = new THREE.BoxGeometry(size, size, size);
@@ -225,11 +186,6 @@ function onDocumentMouseDown(event) {
     updateMe();
 }
 
-function transformMouse(event) {
-    mouse.x = event.clientX-800;
-    mouse.y = -event.clientY+450;
-}
-
 function onDocumentMouseMove(event) {
     transformMouse(event);
     scene.getObjectByName(me.id).position.copy(mouse);
@@ -255,39 +211,43 @@ function onDocumentMouseOut(event) {
 
 }
 
+function transformMouse(event) {
+    mouse.x = event.clientX - 800;
+    mouse.y = -event.clientY + 450;
+}
+
+function transformTouch(event) {
+    touch.x = event.touches[0].pageX - 500;
+    touch.y = -event.touches[0].pageY + 500;
+}
+
 function onDocumentTouchStart(event) {
 
     if (event.touches.length === 1) {
-
-        console.log("Touch did start");
-
         event.preventDefault();
 
-        // mouseXOnMouseDown = event.touches[0].pageX - windowHalfX;
-        // targetRotationOnMouseDown = targetRotation;
-
+        transformTouch(event);
+        scene.getObjectByName(me.id).position.copy(touch);
+        updateMe();
     }
-
 }
 
 function onDocumentTouchMove(event) {
 
     if (event.touches.length === 1) {
-
-        console.log("Touch did move");
-
         event.preventDefault();
 
-        // mouseX = event.touches[0].pageX - windowHalfX;
-        // targetRotation = targetRotationOnMouseDown + (mouseX - mouseXOnMouseDown) * 0.05;
+        transformTouch(event);
+        scene.getObjectByName(me.id).position.copy(touch);
+        updateMe();
 
     }
-
 }
 
 function onDocumentTouchEnd(event) {
-    console.log("Touch did end");
-
+    transformTouch(event);
+    scene.getObjectByName(me.id).position.copy(touch);
+    updateMe();
 }
 
 
@@ -298,6 +258,5 @@ function animate() {
 }
 
 function render() {
-    // plane.rotation.y = cube.rotation.y += (targetRotation - cube.rotation.y) * 0.05;
     renderer.render(scene, camera);
 }
