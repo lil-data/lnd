@@ -152,6 +152,8 @@
     // remove previous cell shapes
     for (var i = 0; i < this.cellMeshes.length; ++i) {
       this.scene.remove(this.cellMeshes[i]);
+      this.cellMeshes[i].geometry.dispose();
+      this.cellMeshes[i].material.dispose();
     }
     this.cellMeshes.length = 0;
     this.cellGeoms.length = 0;
