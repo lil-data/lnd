@@ -9,28 +9,30 @@
 
   var Leonard = function(domElement) {
 
-    this.width = domElement.body.clientWidth;
-    this.height = 500;//domElement.body.clientHeight;
+    this.width = window.innerWidth;
+    this.height = window.innerHeight;
 
     // init scene
     this.scene = new THREE.Scene();
     this.lines = [];
 
-    var lineMat = new THREE.LineBasicMaterial({color: 0xffffff});
 
-    var geomX = new THREE.Geometry();
-    geomX.vertices.push(new THREE.Vector3(-this.width/2, 0, 0 ), new THREE.Vector3(this.width/2, 0, 0));
-    this.scene.add(new THREE.Line(geomX, lineMat));
+    // draw x-y axes
+    // var lineMat = new THREE.LineBasicMaterial({color: 0xffffff});
 
-    var geomY = new THREE.Geometry();
-    geomY.vertices.push(new THREE.Vector3(0, -this.height/2, 0 ), new THREE.Vector3(0, this.height/2, 0));
-    this.scene.add(new THREE.Line(geomY, lineMat));
+    // var geomX = new THREE.Geometry();
+    // geomX.vertices.push(new THREE.Vector3(-this.width/2, 0, 0 ), new THREE.Vector3(this.width/2, 0, 0));
+    // this.scene.add(new THREE.Line(geomX, lineMat));
+
+    // var geomY = new THREE.Geometry();
+    // geomY.vertices.push(new THREE.Vector3(0, -this.height/2, 0 ), new THREE.Vector3(0, this.height/2, 0));
+    // this.scene.add(new THREE.Line(geomY, lineMat));
 
     // init renderer
     this.renderer = new THREE.WebGLRenderer({antialias: true});
-    domElement.body.appendChild(this.renderer.domElement);
+    domElement.getElementById('canvascontainer').appendChild(this.renderer.domElement);
     this.renderer.setSize(this.width, this.height);
-    this.renderer.setClearColor(0xcccccc);
+    this.renderer.setClearColor(0x000000);
     this.renderer.setPixelRatio(window.devicePixelRatio);
 
     // init camera
@@ -56,6 +58,7 @@
     // mouse listeners
     domElement.body.addEventListener('mousemove',
       function(event) {
+        event.preventDefault();
         that.user_position_updated(
           event.clientX-(that.width/2),
           (that.height/2)-event.clientY);
@@ -63,12 +66,14 @@
       false);
 
     domElement.body.addEventListener('ontouchstart', function(event) {
+        event.preventDefault();
         that.user_position_updated(
           event.touches[0].pageX-(that.width/2),
           (that.height/2)-event.touches[0].pageY);
       }, false);
 
     domElement.body.addEventListener('touchmove', function(event) {
+        event.preventDefault();
         that.user_position_updated(
           event.touches[0].pageX-(that.width/2),
           (that.height/2)-event.touches[0].pageY);
@@ -157,9 +162,8 @@
             0.0));
     }
     var material = new THREE.PointCloudMaterial({
-        color: 0xffffff,
-        vertexColors: THREE.VertexColors,
-        size: 10});
+        color: 0xFFFFFF,
+        size: 3});
     this.pointCloud = new THREE.PointCloud(geometry, material);
     this.scene.add(this.pointCloud);
 
@@ -170,7 +174,7 @@
     this.lines.length = 0;
 
     // add voronoi edges
-    var lineMat = new THREE.LineBasicMaterial({color: 0xffffff, linewidth: 20});
+    var lineMat = new THREE.LineBasicMaterial({color: 0xffffff, linewidth: 3});
     for (var e in this.vordiagram.edges) {
         var edge = this.vordiagram.edges[e];
         var shapeGeom = new THREE.Geometry();

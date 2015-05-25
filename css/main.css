@@ -1,0 +1,48 @@
+* { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+}
+
+body {
+      font: 13px Helvetica, Arial;
+      height: auto;
+      width: auto;
+      background-color: red;
+}
+
+#container
+{
+      height: 100%;
+      width: 100%;
+}
+
+#canvascontainer {
+      z-index: 1;
+}
+
+#menu
+{
+      height: 50px;
+      width: 100%;
+      position: absolute;
+      z-index: 10;
+      bottom: 0;
+}
+
+input[type=file] {
+      
+}
+
+#stats {
+}
+
+#uploadImage {
+      width: 20%;
+      margin-left: 40%;
+      text-align: center;
+}
+
+#uploadPreview img{
+}
+
