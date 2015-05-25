@@ -15,42 +15,31 @@
     // init scene
     this.scene = new THREE.Scene();
     this.lines = [];
-
-
-    // draw x-y axes
-    // var lineMat = new THREE.LineBasicMaterial({color: 0xffffff});
-
-    // var geomX = new THREE.Geometry();
-    // geomX.vertices.push(new THREE.Vector3(-this.width/2, 0, 0 ), new THREE.Vector3(this.width/2, 0, 0));
-    // this.scene.add(new THREE.Line(geomX, lineMat));
-
-    // var geomY = new THREE.Geometry();
-    // geomY.vertices.push(new THREE.Vector3(0, -this.height/2, 0 ), new THREE.Vector3(0, this.height/2, 0));
-    // this.scene.add(new THREE.Line(geomY, lineMat));
+    this.cellGeoms = [];
+    this.cellMeshes = [];
 
     // init renderer
-    this.renderer = new THREE.WebGLRenderer({antialias: true});
+    this.renderer = new THREE.WebGLRenderer({
+      antialias: true
+    });
     domElement.getElementById('canvascontainer').appendChild(this.renderer.domElement);
     this.renderer.setSize(this.width, this.height);
     this.renderer.setClearColor(0x000000);
     this.renderer.setPixelRatio(window.devicePixelRatio);
 
     // init camera
-    this.camera = new THREE.PerspectiveCamera(45, (this.width/this.height), 1, 10000);
+    this.camera = new THREE.PerspectiveCamera(45, (this.width / this.height), 1, 10000);
     this.camera.position.set(0, 0, 500);
     this.camera.lookAt(new THREE.Vector3(0, 0, 0));
 
-    // init geometry
-    this.pointCloud = new THREE.PointCloud(
-      new THREE.Geometry(),
-      new THREE.PointCloudMaterial({
-        color: 0xffffff,
-        vertexColors: THREE.VertexColors,
-        size: 10}));
-
     // init voronoi
     this.voronoi = new Voronoi();
-    this.vorbox = {xl: -this.width/2, xr: this.width/2, yt: -this.height/2, yb: this.height/2}; // size of diagram
+    this.vorbox = {
+      xl: -this.width / 2,
+      xr: this.width / 2,
+      yt: -this.height / 2,
+      yb: this.height / 2
+    }; // size of diagram
 
     // init users
     this.users = {};
@@ -60,24 +49,21 @@
       function(event) {
         event.preventDefault();
         that.user_position_updated(
-          event.clientX-(that.width/2),
-          (that.height/2)-event.clientY);
+          event.clientX - (that.width / 2), (that.height / 2) - event.clientY);
       },
       false);
 
     domElement.body.addEventListener('ontouchstart', function(event) {
-        event.preventDefault();
-        that.user_position_updated(
-          event.touches[0].pageX-(that.width/2),
-          (that.height/2)-event.touches[0].pageY);
-      }, false);
+      event.preventDefault();
+      that.user_position_updated(
+        event.touches[0].pageX - (that.width / 2), (that.height / 2) - event.touches[0].pageY);
+    }, false);
 
     domElement.body.addEventListener('touchmove', function(event) {
-        event.preventDefault();
-        that.user_position_updated(
-          event.touches[0].pageX-(that.width/2),
-          (that.height/2)-event.touches[0].pageY);
-      }, false);
+      event.preventDefault();
+      that.user_position_updated(
+        event.touches[0].pageX - (that.width / 2), (that.height / 2) - event.touches[0].pageY);
+    }, false);
 
     // init heroku socket and callbacks
     var that = this;
@@ -106,7 +92,11 @@
     // add self to users object
     this.id = userId;
     this.users = users;
-    this.users[this.id] = {x: 0, y: 0, img: false};
+    this.users[this.id] = {
+      x: 0,
+      y: 0,
+      img: false
+    };
 
     // notify server
     this.socket.emit('userDidInit', this.id, this.users[this.id]);
@@ -114,7 +104,11 @@
 
   Leonard.prototype.server_user_added = function(userId, user) {
     console.log('Server: user', userId, 'added at', user.x, user.y, this.users);
-    this.users[userId] = {x: user.x, y: user.y, img: user.img};
+    this.users[userId] = {
+      x: user.x,
+      y: user.y,
+      img: user.img
+    };
   };
 
   Leonard.prototype.server_user_removed = function(userId) {
@@ -146,44 +140,46 @@
     var sites = [];
     for (var id in this.users) {
       if (!this.users.hasOwnProperty(id)) continue;
-      sites.push({x: this.users[id].x, y: this.users[id].y});
+      sites.push({
+        x: this.users[id].x,
+        y: this.users[id].y
+      });
     }
 
     // update voronoi calculation
     this.vordiagram = this.voronoi.compute(sites, this.vorbox);
 
-    // update geometry
-    this.scene.remove(this.pointCloud);
-    var geometry = new THREE.Geometry();
-    for (var c in this.vordiagram.cells) {
-        geometry.vertices.push(new THREE.Vector3(
-            this.vordiagram.cells[c].site.x,
-            this.vordiagram.cells[c].site.y,
-            0.0));
+    // remove previous cell shapes
+    for (var i = 0; i < this.cellMeshes.length; ++i) {
+      this.scene.remove(this.cellMeshes[i]);
     }
-    var material = new THREE.PointCloudMaterial({
-        color: 0xFFFFFF,
-        size: 3});
-    this.pointCloud = new THREE.PointCloud(geometry, material);
-    this.scene.add(this.pointCloud);
-
-    // remove previous lines
-    for (var i = 0; i < this.lines.length; ++i) {
-      this.scene.remove(this.lines[i]);
+    this.cellMeshes.length = 0;
+    this.cellGeoms.length = 0;
+    // create cell shapes from cells and add to scene
+    for (var v in this.vordiagram.cells) {
+      var cell = this.vordiagram.cells[v];
+      var cellShape = new THREE.Shape();
+      for (var h in cell.halfedges) {
+        var halfedge = cell.halfedges[h];
+        var start = halfedge.getStartpoint();
+        if (h == 0) {
+          cellShape.moveTo(start.x, start.y);
+        } else if (h === cell.halfedges.length) {
+          var end = halfedge.getEndpoint();
+          cellShape.lineTo(start.x, start.y);
+          cellShape.lineTo(end.x, end.y);
+        } else {
+          cellShape.lineTo(start.x, start.y);
+        }
+      }
+      this.cellGeoms.push(new THREE.ShapeGeometry(cellShape));
     }
-    this.lines.length = 0;
-
-    // add voronoi edges
-    var lineMat = new THREE.LineBasicMaterial({color: 0xffffff, linewidth: 3});
-    for (var e in this.vordiagram.edges) {
-        var edge = this.vordiagram.edges[e];
-        var shapeGeom = new THREE.Geometry();
-        shapeGeom.vertices.push(new THREE.Vector3(edge.va.x, edge.va.y, 0));
-        shapeGeom.vertices.push(new THREE.Vector3(edge.vb.x, edge.vb.y, 0));
-
-        var line = new THREE.Line(shapeGeom, lineMat);
-        this.lines.push(line);
-        this.scene.add(line);
+    var l = Object.keys(this.cellGeoms).length;
+    for (var g in this.cellGeoms) {
+      this.cellMeshes[g] = new THREE.Mesh(this.cellGeoms[g], new THREE.MeshBasicMaterial({
+        color: g/l * 0xffffff
+      }));
+      this.scene.add(this.cellMeshes[g]);
     }
   };
 
