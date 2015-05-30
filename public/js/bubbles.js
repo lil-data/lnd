@@ -13,7 +13,7 @@
     this.height = window.innerHeight;
 
     this.needsUpdate = false;
-    this.sphereVector = new THREE.Vector3();
+    this.tempVector = new THREE.Vector3();
 
     // init users
     this.users = {};
@@ -183,14 +183,24 @@
     this.spheres.push(mesh);
   };
 
-  Bubbles.prototype.update_spheres = function(id, user) {
-    this.sphereVector.set(user.x, user.y, 0.5);
-    this.sphereVector.unproject(this.camera);
-    this.sphereVector.sub(this.camera.position);
-    var dir = this.sphereVector.normalize();
+  Bubbles.prototype.convert_canvas_coords_to_scene = function(x, y) {
+    this.tempVector.set(x, y, 0.5);
+    this.tempVector.unproject(this.camera);
+    this.tempVector.sub(this.camera.position);
+    var dir = this.tempVector.normalize();
     var distance = -this.camera.position.z / dir.z;
-    var pos = this.camera.position.clone().add(dir.multiplyScalar(distance));
-    this.scene.getObjectByName(id).position.set(pos.x, pos.y, 0);
+    return this.camera.position.clone().add(dir.multiplyScalar(distance));
+  };
+
+  Bubbles.prototype.update_spheres = function(id, user) {
+    var bubble = this.scene.getObjectByName(id);
+    var sceneCoords = this.convert_canvas_coords_to_scene(user.x, user.y);
+
+    var v = sceneCoords.clone()
+    v.sub(bubble.position);
+    v.multiplyScalar(0.05);
+    v.z = 0;
+    bubble.position.add(v);
   };
 
   Bubbles.prototype.render = function() {
@@ -199,13 +209,9 @@
   };
 
   Bubbles.prototype.update = function() {
-    // how to give this momentum?
-    if (this.needsUpdate) {
       for (var u in this.users) {
         this.update_spheres(u, this.users[u]);
       }
-      this.needsUpdate = false;
-    }
   };
 
   window.Bubbles = Bubbles;
