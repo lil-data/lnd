@@ -13,6 +13,7 @@
     this.height = window.innerHeight;
 
     this.needsUpdate = false;
+    this.sphereVector = new THREE.Vector3();
 
     // init users
     this.users = {};
@@ -144,8 +145,9 @@
 
   Bubbles.prototype.server_user_removed = function(userId) {
     console.log('Server: user', userId, 'removed', this.users);
+
     delete this.users[userId];
-    delete this.scene.getObjectByName(userId);
+    this.scene.remove(this.scene.getObjectByName(userId));
   };
 
   Bubbles.prototype.server_user_updated = function(userId, user) {
@@ -182,15 +184,13 @@
   };
 
   Bubbles.prototype.update_spheres = function(id, user) {
-    var mouseVec = new THREE.Vector3(user.x, user.y, 0.5);
-    mouseVec.unproject(this.camera);
-    mouseVec.sub(this.camera.position);
-    var dir = mouseVec.normalize();
+    this.sphereVector.set(user.x, user.y, 0.5);
+    this.sphereVector.unproject(this.camera);
+    this.sphereVector.sub(this.camera.position);
+    var dir = this.sphereVector.normalize();
     var distance = -this.camera.position.z / dir.z;
     var pos = this.camera.position.clone().add(dir.multiplyScalar(distance));
-
-    this.scene.getObjectByName(id).position.x = pos.x;
-    this.scene.getObjectByName(id).position.y = pos.y;
+    this.scene.getObjectByName(id).position.set(pos.x, pos.y, 0);
   };
 
   Bubbles.prototype.render = function() {
