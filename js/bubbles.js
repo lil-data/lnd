@@ -17,7 +17,7 @@
 
     // init heroku socket and callbacks
     var that = this;
-    this.socket = io('https://lnd.herokuapp.com/');
+    this.socket = io('https://lnd.herokuapp.com/bub');
 
     this.socket.on('initUser', function(users, userId) {
       that.server_on_connection(users, userId);
