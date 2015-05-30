@@ -85,7 +85,7 @@
     this.renderer.setClearColor(0x000000);
     this.renderer.autoClear = false;
     this.renderer.setPixelRatio(window.devicePixelRatio);
-    domElement.getElementById('canvascontainer').appendChild(this.renderer.domElement);
+    domElement.getElementById('container').appendChild(this.renderer.domElement);
 
     // mouse listeners
     domElement.body.addEventListener('mousemove',
