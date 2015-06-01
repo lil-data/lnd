@@ -21,6 +21,10 @@ app.get('/bub', function(req, res){
   res.sendFile(__dirname + '/public/bub.html');
 });
 
+app.get('/wheel', function(req, res){
+  res.sendFile(__dirname + '/public/wheel.html');
+});
+
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var fs = require('fs');
