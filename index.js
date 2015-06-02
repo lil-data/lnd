@@ -25,11 +25,17 @@ app.get('/wheel', function(req, res){
   res.sendFile(__dirname + '/public/wheel.html');
 });
 
+app.get('/vor', function(req, res){
+  res.sendFile(__dirname + '/public/vor.html');
+});
+
+
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var fs = require('fs');
 
 var bub = io.of('/bub');
+var vor = io.of('/vor');
 
 bub.on('connection', function(socket) {
   console.log("Connected to BUB nsp");

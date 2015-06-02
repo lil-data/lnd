@@ -47,12 +47,20 @@
     this.scene = new THREE.Scene();
     this.sceneCube = new THREE.Scene();
     this.geometry = new THREE.SphereGeometry(100, 32, 16);
-    var path = "img/bubbles/";
-    var format = '.jpg';
+    // var path = "img/bubbles/";
+    // var format = '.jpg';
+    // var urls = [
+    //   path + 'posx' + format, path + 'negx' + format,
+    //   path + 'posy' + format, path + 'negy' + format,
+    //   path + 'posz' + format, path + 'negz' + format
+    // ];
+    var path = "img/";
+    var png = '.jpg';
+    var rand = Math.round(Math.random()) + 1;
     var urls = [
-      path + 'posx' + format, path + 'negx' + format,
-      path + 'posy' + format, path + 'negy' + format,
-      path + 'posz' + format, path + 'negz' + format
+      path + 'droptrap' + rand + png, path + 'droptrap' + rand + png,
+      path + 'droptrap' + rand + png, path + 'droptrap' + rand + png,
+      path + 'droptrap' + rand + png, path + 'droptrap' + rand + png
     ];
     this.textureCube = THREE.ImageUtils.loadTextureCube(urls);
     this.textureCube.format = THREE.RGBFormat;
@@ -66,9 +74,19 @@
     };
     this.material = new THREE.ShaderMaterial(this.parameters);
     this.scene.matrixAutoUpdate = false;
+
+    var jpeg = '.jpeg';
+    var urls2 = [
+      path + 'drops' + jpeg, path + 'drops' + jpeg,
+      path + 'drops' + jpeg, path + 'drops' + jpeg,
+      path + 'drops' + jpeg, path + 'drops' + jpeg
+    ];
+    this.textureCube2 = THREE.ImageUtils.loadTextureCube(urls2);
+    this.textureCube2.format = THREE.RGBFormat;
+
     // Skybox
     this.skyshader = THREE.ShaderLib["cube"];
-    this.skyshader.uniforms["tCube"].value = this.textureCube;
+    this.skyshader.uniforms["tCube"].value = this.textureCube2;
     this.skymaterial = new THREE.ShaderMaterial({
       fragmentShader: this.skyshader.fragmentShader,
       vertexShader: this.skyshader.vertexShader,
@@ -181,7 +199,7 @@
     mesh.position.x = user.x;
     mesh.position.y = user.y;
     mesh.position.z = 0;
-    mesh.scale.x = mesh.scale.y = mesh.scale.z = 3;
+    mesh.scale.x = mesh.scale.y = mesh.scale.z = 1;
     this.scene.add(mesh);
     this.spheres.push(mesh);
   };
@@ -204,6 +222,9 @@
     v.multiplyScalar(0.05);
     v.z = 0;
     bubble.position.add(v);
+    bubble.scale.x += 0.0025;
+    bubble.scale.y += 0.0025;
+    bubble.scale.z += 0.0025;
   };
 
   Bubbles.prototype.render = function() {
