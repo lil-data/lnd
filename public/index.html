@@ -1,15 +1,53 @@
 <!doctype html>
 <html>
   <head>
-    <title>Leonard Voronoy</title>
+    <title>WELCOME TO WEBSITE</title>
     <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1">
     <link rel="stylesheet" type="text/css" href="./css/main.css">
   </head>
   <body>
     <div id="container">
-      <img src="img/landing.png" width="300" height="500">
-      <a href="/bub">Bub</a>
-      <a href="/vor">Vor</a>
+      <div id="WELCOME">
+        <div id="WELCOMETEXT">
+          <p>
+            Thank you for<br>
+            joining</p>
+            <p class="BOLD" id="NETWORK">NETWORK,</p>
+            <p>and welcome to</p>
+            <p class="BOLD" id="WEBSITE">WEBSITE.</p>
+            <p>Your name in<br>
+            this space is</p>
+            <p class="BOLD" id="USERID"></p>
+            <p>Tap the button to<br>
+            explore, and meet<br>
+            other users.</p>
+          </p>
+        </div>
+        <div id="button">
+          <a href="/home"><img id="buttonimg" src="/img/bluebutton.png" width="100px" height="100px"></a>
+        </div>
+      </div>
     </div>
+    <script type="text/javascript" charset="utf-8">
+
+      function makeid()
+      {
+        var text = "";
+        var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+        for (var i = 0; i < 4; i++)
+          text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+        return text;
+      }
+
+      window.onload = function (e)
+      {
+        var id = document.getElementById('USERID');
+        id.innerHTML = id.innerHTML + makeid() + '.';
+      };
+
+    </script>
   </body>
 </html>

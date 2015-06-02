@@ -1,3 +1,15 @@
+@font-face {
+  font-family: 'Roboto-Regular';
+  src: url('/fonts/Roboto-Regular.woff2') format('woff2'),
+       url('/fonts/Roboto-Regular.ttf')  format('truetype')
+}
+
+@font-face {
+  font-family: 'Roboto-Light';
+  src: url('/fonts/Roboto-Light.woff2') format('woff2'),
+       url('/fonts/Roboto-Light.ttf')  format('truetype')
+}
+
 * {
       margin: 0;
       padding: 0;
@@ -5,20 +17,52 @@
 }
 
 body {
-      font: 13px Helvetica, Arial;
+      font: 13px 'Roboto-Light', Helvetica, Arial;
       height: auto;
       width: auto;
-      background-color: red;
+      background-color: white;
 }
 
 #container
 {
       height: 100%;
       width: 100%;
+      font-size: 3em;
 }
 
 #canvascontainer {
       z-index: 1;
+}
+
+#WELCOME {
+      margin-left: 10px;
+      margin-top: 10px;
+      /*width: 20%;*/
+}
+
+#HOME {
+      margin-left: 10px;
+      margin-top: 10px;
+      /*width: 20%;*/
+}
+
+#WELCOMETEXT {
+}
+
+.BOLD {
+      font: 13px 'Roboto-Regular', Helvetica, Arial;
+      font-size: inherit;
+      text-align: center;   
+}
+
+#NETWORK {}
+#WEBSITE {}
+#USERID {}
+
+#buttonimg {
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
 }
 
 #menu
