@@ -1,0 +1,150 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Heavy Logo Test</title>
+    <meta charset="utf-8">
+    <style>
+
+      #main {
+        width: 100%;
+        height: 50%;
+        vertical-align: left;
+      }
+
+      #question {
+        margin-top: 50px;
+        height: 200px;
+        font-size:60px;
+        font-family:Arial;
+        text-align: center;
+      }
+
+      .button {
+        height: 200px;
+        position: relative;
+        -moz-border-radius:28px;
+        -webkit-border-radius:28px;
+        border-radius:28px;
+        border:1px solid #18ab29;
+        display:inline-block;
+        cursor:pointer;
+        color:#ffffff;
+        padding:16px 31px;
+        text-decoration:none;
+        text-shadow:0px 1px 0px #2f6627;
+        font-family:Arial;
+        font-size:60px;
+      }
+
+      .button-no {
+        width: 40%;
+        margin-left: 5%;
+        background-color:#dc143c;
+      }
+
+      .button-yes {
+        width: 40%;
+        margin-left: 10%;
+        background-color:#44c767;
+        border-style:inset;
+      }
+
+      #result-no {
+        height: 100px;
+        position:relative;
+        width: 40%;
+        margin-left: 5%;
+      }
+
+      #result-yes {
+        height: 100px;
+        position:relative;
+        width: 40%;
+        margin-left: 10%;
+      }
+
+    </style>
+    <script type="text/javascript" src="./js/lib/isomer.min.js"></script>
+    <script type="text/javascript">
+
+      var iso;
+      var Shape = Isomer.Shape;
+      var Path = Isomer.Path;
+      var Point = Isomer.Point;
+      var Color = Isomer.Color;
+
+      var green = new Color(50, 160, 60);
+
+      var angle = 0;
+
+      function scene() {
+        iso.canvas.clear();
+
+        var r = 5;
+        var y1 = -1;
+        var y2 = y1 + (r * Math.cos(Math.PI*0.25));
+        var centre = Point(0, y1, 6);
+
+        var x1 = r * Math.cos(angle);
+        var x2 = r * Math.cos(angle+(Math.PI*0.5));
+        var x3 = r * Math.cos(angle+(Math.PI));
+        var x4 = r * Math.cos(angle+(Math.PI*1.5));
+
+        var z1 = r * Math.sin(angle);
+        var z2 = r * Math.sin(angle+(Math.PI*0.5));
+        var z3 = r * Math.sin(angle+(Math.PI));
+        var z4 = r * Math.sin(angle+(Math.PI*1.5));
+
+        // // right face
+        iso.add(new Path([
+          centre.translate(x1, y1, z1),
+          centre.translate(x2, y1, z2),
+          centre.translate(x3, y1, z3),
+          centre.translate(x4, y1, z4)
+        ]), green);
+
+        // // left face
+        iso.add(new Path([
+          centre.translate(x1, y2, z1),
+          centre.translate(x2, y2, z2),
+          centre.translate(x3, y2, z3),
+          centre.translate(x4, y2, z4)
+        ]), green);
+
+        // top face
+        iso.add(new Path([
+          centre.translate(x1, y1, z1),
+          centre.translate(x2, y1, z2),
+          centre.translate(x2, y2, z2),
+          centre.translate(x1, y2, z1)
+        ]), green);
+
+        // bottom face
+        iso.add(new Path([
+          centre.translate(x3, y1, z3),
+          centre.translate(x4, y1, z4),
+          centre.translate(x4, y2, z4),
+          centre.translate(x3, y2, z3)
+        ]), green);
+
+        angle += 2 * Math.PI / 120;
+
+        requestAnimationFrame(scene);
+      }
+
+      window.onload = function(e) {
+        iso = new Isomer(document.getElementById("main"));
+        scene();
+      };
+
+    </script>
+  </head>
+  <body>
+    <canvas width="1500" height="1000" id="main"></canvas>
+    <div id="question">Which way is this shape spinning?</div>
+    <div>
+      <button type="button" class="button button-no" onclick="">No</button>
+      <button type="button" class="button button-yes">Yes</button>
+    </div>
+  </body>
+</html>

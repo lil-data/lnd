@@ -163,13 +163,16 @@
   };
 
   Bubbles.prototype.user_position_updated = function(canvasX, canvasY) {
-    var sceneX = (canvasX/this.width)*2 - 1;
-    var sceneY = 1 - 2*(canvasY/this.height);
+    // server could not be connected
+    if (this.users[this.id]) {
 
-    this.users[this.id].x = sceneX;
-    this.users[this.id].y = sceneY;
-    this.client_user_updated();
-    this.needsUpdate = true;
+      var sceneX = (canvasX/this.width)*2 - 1;
+      var sceneY = 1 - 2*(canvasY/this.height);
+
+      this.users[this.id].x = sceneX;
+      this.users[this.id].y = sceneY;
+      this.client_user_updated();
+    }
   };
 
   Bubbles.prototype.create_sphere = function(id, user) {
