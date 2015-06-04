@@ -7,7 +7,7 @@
 
 (function(window) {
 
-  var Bubbles = function(domElement) {
+  var Touch = function(domElement) {
 
     this.width = window.innerWidth;
     this.height = window.innerHeight;
@@ -15,12 +15,14 @@
     this.needsUpdate = false;
     this.tempVector = new THREE.Vector3();
 
+    this.isTouching = false;
+
     // init users
     this.users = {};
 
     // init heroku socket and callbacks
     var that = this;
-    this.socket = io('/bub');
+    this.socket = io('/touch');
 
     this.socket.on('initUser', function(users, userId) {
       that.server_on_connection(users, userId);
@@ -38,71 +40,19 @@
       that.server_user_updated(userId, user);
     });
 
-    this.spheres = [];
-
-    // init scene
     this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 100000);
     this.camera.position.z = 2000;
-    this.cameraCube = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 100000);
     this.scene = new THREE.Scene();
-    this.sceneCube = new THREE.Scene();
-    this.geometry = new THREE.SphereGeometry(100, 32, 16);
-    // var path = "img/bubbles/";
-    // var format = '.jpg';
-    // var urls = [
-    //   path + 'posx' + format, path + 'negx' + format,
-    //   path + 'posy' + format, path + 'negy' + format,
-    //   path + 'posz' + format, path + 'negz' + format
-    // ];
-    var path = "img/";
-    var png = '.jpg';
-    var rand = Math.round(Math.random()) + 1;
-    var urls = [
-      path + 'droptrap' + rand + png, path + 'droptrap' + rand + png,
-      path + 'droptrap' + rand + png, path + 'droptrap' + rand + png,
-      path + 'droptrap' + rand + png, path + 'droptrap' + rand + png
-    ];
-    this.textureCube = THREE.ImageUtils.loadTextureCube(urls);
-    this.textureCube.format = THREE.RGBFormat;
-    this.shader = THREE.FresnelShader;
-    this.uniforms = THREE.UniformsUtils.clone(this.shader.uniforms);
-    this.uniforms["tCube"].value = this.textureCube;
-    this.parameters = {
-      fragmentShader: this.shader.fragmentShader,
-      vertexShader: this.shader.vertexShader,
-      uniforms: this.uniforms
-    };
-    this.material = new THREE.ShaderMaterial(this.parameters);
-    this.scene.matrixAutoUpdate = false;
 
-    var jpeg = '.jpeg';
-    var urls2 = [
-      path + 'drops' + jpeg, path + 'drops' + jpeg,
-      path + 'drops' + jpeg, path + 'drops' + jpeg,
-      path + 'drops' + jpeg, path + 'drops' + jpeg
-    ];
-    this.textureCube2 = THREE.ImageUtils.loadTextureCube(urls2);
-    this.textureCube2.format = THREE.RGBFormat;
-
-    // Skybox
-    this.skyshader = THREE.ShaderLib["cube"];
-    this.skyshader.uniforms["tCube"].value = this.textureCube2;
-    this.skymaterial = new THREE.ShaderMaterial({
-      fragmentShader: this.skyshader.fragmentShader,
-      vertexShader: this.skyshader.vertexShader,
-      uniforms: this.skyshader.uniforms,
-      side: THREE.BackSide
-    });
-    var skymesh = new THREE.Mesh(new THREE.BoxGeometry(100000, 100000, 100000), this.skymaterial);
-    this.sceneCube.add(skymesh);
+    // some drawing setup
 
     // init renderer
     this.renderer = new THREE.WebGLRenderer({
       antialias: false
     });
     this.renderer.setSize(this.width, this.height);
-    this.renderer.setClearColor(0x000000);
-    this.renderer.autoClear = false;
+    this.renderer.setClearColor(0xFFFF00);
+    // this.renderer.autoClear = false;
     this.renderer.setPixelRatio(window.devicePixelRatio);
     domElement.getElementById('container').appendChild(this.renderer.domElement);
 
@@ -114,9 +64,11 @@
       },
       false);
 
-    domElement.body.addEventListener('ontouchstart',
+    domElement.body.addEventListener('touchstart',
       function(event) {
         event.preventDefault();
+        this.isTouching = true;
+        console.log(this.isTouching);
         that.user_position_updated(event.touches[0].pageX, event.touches[0].pageY);
       },
       false);
@@ -124,12 +76,23 @@
     domElement.body.addEventListener('touchmove',
       function(event) {
         event.preventDefault();
+        this.isTouching = true;
+        console.log(this.isTouching);
         that.user_position_updated(event.touches[0].pageX, event.touches[0].pageY);
+      },
+      false);
+
+    domElement.body.addEventListener('touchend',
+      function(event) {
+        event.preventDefault();
+        this.isTouching = false;
+        console.log(this.isTouching);
+        // that.user_position_updated(event.touches[0].pageX, event.touches[0].pageY);
       },
       false);
   };
 
-  Bubbles.prototype.server_on_connection = function(users, userId) {
+  Touch.prototype.server_on_connection = function(users, userId) {
     console.log('Server: connected', users, userId);
 
     // add self to users object
@@ -146,29 +109,29 @@
 
     for (var u in this.users) {
       console.log(u, this.users[u]);
-      this.create_sphere(u, this.users[u]);
+      this.create_touch(u, this.users[u]);
     }
   };
 
-  Bubbles.prototype.server_user_added = function(userId, user) {
+  Touch.prototype.server_user_added = function(userId, user) {
     console.log('Server: user', userId, 'added at', user.x, user.y, this.users);
     this.users[userId] = {
       x: user.x,
       y: user.y,
       img: user.img
     };
-    this.create_sphere(userId, this.users[userId]);
+    this.create_touch(userId, this.users[userId]);
     this.needsUpdate = true;
   };
 
-  Bubbles.prototype.server_user_removed = function(userId) {
+  Touch.prototype.server_user_removed = function(userId) {
     console.log('Server: user', userId, 'removed', this.users);
 
     delete this.users[userId];
     this.scene.remove(this.scene.getObjectByName(userId));
   };
 
-  Bubbles.prototype.server_user_updated = function(userId, user) {
+  Touch.prototype.server_user_updated = function(userId, user) {
     // console.log('Server: user', userId, 'updated', user.x, user.y);
     this.users[userId].x = user.x;
     this.users[userId].y = user.y;
@@ -176,11 +139,11 @@
     this.needsUpdate = true;
   };
 
-  Bubbles.prototype.client_user_updated = function() {
+  Touch.prototype.client_user_updated = function() {
     this.socket.emit('userDidUpdate', this.id, this.users[this.id]);
   };
 
-  Bubbles.prototype.user_position_updated = function(canvasX, canvasY) {
+  Touch.prototype.user_position_updated = function(canvasX, canvasY) {
     // server could not be connected
     if (this.users[this.id]) {
 
@@ -192,19 +155,8 @@
       this.client_user_updated();
     }
   };
-
-  Bubbles.prototype.create_sphere = function(id, user) {
-    var mesh = new THREE.Mesh(this.geometry, this.material);
-    mesh.name = id;
-    mesh.position.x = user.x;
-    mesh.position.y = user.y;
-    mesh.position.z = 0;
-    mesh.scale.x = mesh.scale.y = mesh.scale.z = 1;
-    this.scene.add(mesh);
-    this.spheres.push(mesh);
-  };
-
-  Bubbles.prototype.convert_canvas_coords_to_scene = function(x, y) {
+  
+  Touch.prototype.convert_canvas_coords_to_scene = function(x, y) {
     this.tempVector.set(x, y, 0.5);
     this.tempVector.unproject(this.camera);
     this.tempVector.sub(this.camera.position);
@@ -213,31 +165,62 @@
     return this.camera.position.clone().add(dir.multiplyScalar(distance));
   };
 
-  Bubbles.prototype.update_spheres = function(id, user) {
-    var bubble = this.scene.getObjectByName(id);
+  Touch.prototype.create_touch = function(id, user) {
+    var mat;
+    if(id == this.id) {
+      var finger   = THREE.ImageUtils.loadTexture("./img/fingsq.png");
+      mat = new THREE.MeshBasicMaterial( { map: finger, transparent: true } );
+    } else {
+      var finger2  = THREE.ImageUtils.loadTexture("./img/tipsq.png");
+      mat = new THREE.MeshBasicMaterial( { map: finger2, transparent: true } );
+    }
+    var geom     = new THREE.PlaneBufferGeometry( 4000, 4000 );
+    var mesh     = new THREE.Mesh(geom, mat);
+    mesh.name = id;
+    mesh.position.x = user.x+20;
+    mesh.position.y = user.y-90;
+    if(id == this.id) {
+      mesh.position.z = 2;
+    } else {
+      mesh.position.z = Math.random();
+    }
+    mesh.scale.x = mesh.scale.y = mesh.scale.z = 1;
+    this.scene.add(mesh);
+    // this.spheres.push(mesh);
+  };
+
+  Touch.prototype.update_touches = function(id, user) {
+    var t = this.scene.getObjectByName(id);
     var sceneCoords = this.convert_canvas_coords_to_scene(user.x, user.y);
 
     var v = sceneCoords.clone();
-    v.sub(bubble.position);
+    v.sub(t.position);
     v.multiplyScalar(0.05);
-    v.z = 0;
-    bubble.position.add(v);
-    bubble.scale.x += 0.0025;
-    bubble.scale.y += 0.0025;
-    bubble.scale.z += 0.0025;
+    if(id == this.id) {
+      v.x += 20;
+      v.y -= 90;
+      v.z  = 0;
+    } else {
+      v.x += 20;
+      v.y += 90;
+      v.z  = 0; 
+    }
+    t.position.add(v);
+
+    t.rotation.z = (user.y + user.x) * 2;
+
   };
 
-  Bubbles.prototype.render = function() {
-    this.renderer.render(this.sceneCube, this.cameraCube);
+  Touch.prototype.render = function() {
     this.renderer.render(this.scene, this.camera);
   };
 
-  Bubbles.prototype.update = function() {
+  Touch.prototype.update = function() {
       for (var u in this.users) {
-        this.update_spheres(u, this.users[u]);
+        this.update_touches(u, this.users[u]);
       }
   };
 
-  window.Bubbles = Bubbles;
+  window.Touch = Touch;
 
 })(window);

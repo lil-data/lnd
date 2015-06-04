@@ -64,6 +64,8 @@
       }
 
     </style>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="./js/lib/socket.io.min.js" type="text/javascript" charset="utf-8"></script>
     <script type="text/javascript" src="./js/lib/isomer.min.js"></script>
     <script type="text/javascript">
 
@@ -76,6 +78,8 @@
       var green = new Color(50, 160, 60);
 
       var angle = 0;
+
+      var socket = io('/quiz');
 
       function scene() {
         iso.canvas.clear();

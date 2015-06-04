@@ -1,0 +1,44 @@
+@font-face {
+  font-family: 'Roboto-Regular';
+  src: url('/fonts/Roboto-Regular.woff2') format('woff2'),
+       url('/fonts/Roboto-Regular.ttf')  format('truetype')
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+	font: 13px 'Roboto-Light', Helvetica, Arial;
+}
+
+html {
+	
+	background: url(../img/sky.jpg) no-repeat center center fixed;
+}
+
+form {
+	background: #000;
+	padding: 1px; 
+	position: fixed;
+	bottom: 0;
+	width: 100%;
+}
+
+form input {
+	border: 0;
+	/*padding: 2px; */
+	width: 90%;
+	margin-right: .5%;
+}
+
+form button {
+	width: 9%;
+	background: rgb(130, 224, 255);
+	border: none;
+	/*padding: 2px;*/
+}
+
+#messages { list-style-type: none; margin: 0; padding: 0; }
+
+#messages li { padding: 5px 10px; }
+
+#messages li:nth-child(odd) { background: #eee; }
