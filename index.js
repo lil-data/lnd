@@ -153,6 +153,33 @@ touch.on('connection', function (socket) {
 
 });
 
+// ===========================================
+//     Quiz
+// ===========================================
+
+var yes = 0;
+var no = 0;
+
+// bub namespace
+quiz.on('connection', function (socket) {
+  console.log("[QUIZ] Connected:", socket.id.substring(4, 0));
+
+  quiz.to(socket.id).emit('init', yes, no);
+
+  socket.on('yes', function (y) {
+    yes++;
+    socket.broadcast.emit('yes', yes);
+    console.log("[QUIZ] Yes:", yes);
+  });
+
+  socket.on('no', function (n) {
+    no++;
+    socket.broadcast.emit('no', no);
+    console.log("[QUIZ] No:", no);
+  });
+
+});
+
 var imgURL = "eye.png";
 
 io.on('connection', function (socket) {

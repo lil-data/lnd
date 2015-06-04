@@ -11,17 +11,14 @@
       <div id="WELCOME">
         <div id="WELCOMETEXT">
           <p>
-            Thank you for<br>
-            joining</p>
-            <p class="BOLD" id="NETWORK">NETWORK,</p>
-            <p>and welcome to</p>
+            So you joined <br></p>
+            <p class="BOLD" id="NETWORK">NETWORK.</p>
+            <p>And made it to</p>
             <p class="BOLD" id="WEBSITE">WEBSITE.</p>
-            <p>Your name in<br>
-            this space is</p>
+            <p>Ok... Well, your name<br>
+            here is </p>
             <p class="BOLD" id="USERID"></p>
-            <p>Tap the button to<br>
-            explore, and meet<br>
-            other users.</p>
+            <p id="TAP">Tap the button, </p>
           </p>
         </div>
         <div id="button">
@@ -44,8 +41,11 @@
 
       window.onload = function (e)
       {
-        var id = document.getElementById('USERID');
-        id.innerHTML = id.innerHTML + makeid() + '.';
+        var userid = document.getElementById('USERID');
+        var tap = document.getElementById('TAP');
+        var id = makeid();
+        userid.innerHTML = userid.innerHTML + id + '.';
+        tap.innerHTML = tap.innerHTML + id + '!';
       };
 
     </script>

@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
   <head>
-    <title>Heavy Logo Test</title>
+    <title>WEBSITE – QUIZ</title>
     <meta charset="utf-8">
     <style>
 
@@ -13,7 +13,7 @@
 
       #question {
         margin-top: 50px;
-        height: 200px;
+        height: 80px;
         font-size:60px;
         font-family:Arial;
         text-align: center;
@@ -50,17 +50,25 @@
       }
 
       #result-no {
-        height: 100px;
+        margin-left: 5%;
+        font-size:50px;
+        font-family:Arial;
+        height: 50px;
         position:relative;
         width: 40%;
-        margin-left: 5%;
+        float: left;
+        text-align: center;
       }
 
       #result-yes {
-        height: 100px;
+        margin-left: 10%;
+        font-size:50px;
+        font-family:Arial;
+        height: 50px;
         position:relative;
         width: 40%;
-        margin-left: 10%;
+        float: left;
+        text-align: center;
       }
 
     </style>
@@ -80,6 +88,36 @@
       var angle = 0;
 
       var socket = io('/quiz');
+      var no = 0, yes = 0;
+
+      function emitNo() {
+        no++;
+        socket.emit('no', no);
+        document.getElementById('result-no').innerHTML = no;
+      }
+
+      function emitYes() {
+        yes++;
+        socket.emit('yes', yes);
+        document.getElementById('result-yes').innerHTML = yes;
+      }
+
+      socket.on('init', function (y, n) {
+        yes = y;
+        no = n;
+        document.getElementById('result-yes').innerHTML = yes;
+        document.getElementById('result-no').innerHTML = no;
+      });
+
+      socket.on('yes', function (y) {
+        yes = y;
+        document.getElementById('result-yes').innerHTML = yes;
+      });
+
+      socket.on('no', function (n) {
+        no = n;
+        document.getElementById('result-no').innerHTML = no;
+      });
 
       function scene() {
         iso.canvas.clear();
@@ -145,10 +183,16 @@
   </head>
   <body>
     <canvas width="1500" height="1000" id="main"></canvas>
-    <div id="question">Which way is this shape spinning?</div>
-    <div>
-      <button type="button" class="button button-no" onclick="">No</button>
-      <button type="button" class="button button-yes">Yes</button>
+    <div id="container">
+      <div id="question">Which way is this shape spinning?</div>
+      <div>
+        <div id="results">
+          <p id="result-no"></p>
+          <p id="result-yes"></p>
+        </div>
+        <button type="button" class="button button-no" onclick="emitNo()">No</button>
+        <button type="button" class="button button-yes" onclick="emitYes()">Yes</button>
+      </div>
     </div>
   </body>
 </html>

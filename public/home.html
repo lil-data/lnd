@@ -10,12 +10,35 @@
     <div id="container">
       <div id="HOME">
         <div id="HOMETEXT">
-          <p>Start <a href="/bub" class="BOLD">here</a>, but make sure to come back when you're done.</p>
-          <p>Upload your thoughts to <a href="/chat" class="BOLD">cloud talk</a>.</p>
-          <p>Then, try <a href="/quiz" class="BOLD">wheel</a>.</p>
-          <p>Then, try <a href="/touch" class="BOLD">touch</a>.</p>
-          <p>Then, try <a href="/vor" class="BOLD">vor</a>.</p>
+          <p id="START">before you do anything you gotta grok <a href="/bub" class="BOLD">this</a> (come back when you're done).</p>
+          <p>Now, you're probably thinking, so why not upload those to the <a href="/chat" class="BOLD">cloud</a>?</p>
+          <p>Here's another <a href="/touch" class="BOLD">lesson</a> in communication.</p>
+          <p>And if you're that serious, a <a href="/quiz" class="BOLD">quiz</a>.</p>
+          <p>Right right right you've been great, now get off your phone.</p>
       </div>
     </div>
+    <script type="text/javascript" charset="utf-8">
+
+      function makeid()
+      {
+        var text = "";
+        var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+        for (var i = 0; i < 4; i++)
+          text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+        return text;
+      }
+
+      window.onload = function (e)
+      {
+        var start = document.getElementById('START');
+        // var tap = document.getElementById('TAP');
+        var id = makeid();
+        start.insertAdjacentHTML("beforebegin", "Ok " + id + ", ");
+        // tap.innerHTML = tap.innerHTML + id + '!';
+      };
+
+    </script>
   </body>
 </html>
